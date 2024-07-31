@@ -169,6 +169,15 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 EOF
 
+  printGreen "8. Загрузка Snapshot'a и запуск узла..." && sleep 1
+  # Сброс и загрузка снепшота
+  junctiond tendermint unsafe-reset-all --home $HOME/.junction
+  if curl -s --head curl https://snapshots-testnet.nodejumper.io/airchains-testnet/airchains-testnet_latest.tar.lz4 | head -n 1 | grep "200" > /dev/null; then
+    curl https://snapshots-testnet.nodejumper.io/airchains-testnet/airchains-testnet_latest.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.junction
+  else
+    echo "Snapshot не найден"
+  fi
+  
   # Включение и запуск сервиса
   sudo systemctl daemon-reload
   sudo systemctl enable junctiond
